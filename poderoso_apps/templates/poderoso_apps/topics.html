@@ -1,0 +1,26 @@
+{% extends 'poderoso_apps/base.html' %}
+
+{% block page_header %}
+
+    <p>Topics</p>
+{% endblock page_header %}
+
+{% block content %}
+    <ul class="list-group border-bottom pb-2 mb-4">
+        {% for topic in topics %}
+            <li class="list-group-item border-0">
+                <a href="{% url 'poderoso_apps:topic' topic.id %}">
+                    {{ topic.text }}
+                </a>
+            </li>
+        {% empty %}
+            <li class="list-group-item border-0">
+                Nenhum tópico foi adicionado ainda
+            </li>
+        {% endfor %}
+    </ul>
+
+        <a href="{% url 'poderoso_apps:new_topic' %}">Novo tópico</a>
+
+{% endblock content %}
+

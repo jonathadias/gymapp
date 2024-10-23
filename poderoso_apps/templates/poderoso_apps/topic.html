@@ -1,0 +1,29 @@
+{% extends 'poderoso_apps/base.html' %}
+
+
+{% block page_header %}
+    <p> Topic: {{ topic.text }}</p>
+{% endblock page_header %}
+
+{% block content %}
+    <p>Entries: </p>
+    <p>
+        <a href="{% url 'poderoso_apps:new_entry' topic.id %}">Nova Entrada</a>
+    </p>
+
+    <ul>
+        {% for entry in entries %}
+          <div class="card mb-3">
+            <!-- Adicionar marca de tempo e botão de editar-->
+            <h4 class="card-header">
+                {{ entry.date_added|date:'d M, Y H:i' }}
+                <small><a href="{% url 'poderoso_apps:edit_entry' entry.id %}">Editar</a></small>
+            </h4>
+            <!-- Adição do texto-->
+            <div class="card-body">{{ entry.text|linebreaks }}</div>
+          </div>
+        {% empty %}
+          <p>Não há tópicos criados.</p>
+        {% endfor %}
+
+{% endblock content %}

@@ -1,0 +1,14 @@
+{% extends "poderoso_apps/base.html" %}
+
+{% block content %}
+
+    <p><a href="{% url 'poderoso_apps:topic' topic.id %}">{{ topic }}</a></p>
+
+    <p>Nova entrada:</p>
+    <form action="{% url 'poderoso_apps:new_entry' topic.id %}" method='post'>
+        {% csrf_token %}
+        {{ form.as_div}}
+        <button name="submit">Nova entrada</button>
+    </form>
+
+    {% endblock content %}
