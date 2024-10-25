@@ -1,29 +1,29 @@
-{% extends 'poderoso_apps/base.html' %}
+{% extends 'poderoso_apps/base.html' %}  <!-- Indica que este template estende o template base chamado base.html, permitindo que o conteúdo definido aqui seja inserido nos blocos correspondentes do template base. -->
 
+{% block page_header %}  <!-- Início do bloco que define o cabeçalho da página. -->
+    <p> Topic: {{ topic.text }}</p>  <!-- Exibe o texto do tópico, que é passado para o template a partir da view. -->
+{% endblock page_header %}  <!-- Fim do bloco do cabeçalho da página. -->
 
-{% block page_header %}
-    <p> Topic: {{ topic.text }}</p>
-{% endblock page_header %}
-
-{% block content %}
-    <p>Entries: </p>
+{% block content %}  <!-- Início do bloco que contém o conteúdo principal da página. -->
+    <p>Entries: </p>  <!-- Um parágrafo que informa que as entradas relacionadas ao tópico serão exibidas a seguir. -->
     <p>
-        <a href="{% url 'poderoso_apps:new_entry' topic.id %}">Nova Entrada</a>
+        <a href="{% url 'poderoso_apps:new_entry' topic.id %}">Nova Entrada</a>  <!-- Um link que permite ao usuário adicionar uma nova entrada ao tópico atual. O URL é gerado dinamicamente com base no ID do tópico. -->
     </p>
 
-    <ul>
-        {% for entry in entries %}
-          <div class="card mb-3">
+    <ul>  <!-- Início de uma lista não ordenada que conterá as entradas do tópico. -->
+        {% for entry in entries %}  <!-- Início de um loop que itera sobre todas as entradas associadas ao tópico. -->
+          <div class="card mb-3">  <!-- Cada entrada é exibida dentro de um card, com uma margem inferior para separação. -->
             <!-- Adicionar marca de tempo e botão de editar-->
-            <h4 class="card-header">
-                {{ entry.date_added|date:'d M, Y H:i' }}
-                <small><a href="{% url 'poderoso_apps:edit_entry' entry.id %}">Editar</a></small>
+            <h4 class="card-header">  <!-- Cabeçalho do card onde a data de criação da entrada e o link para edição são exibidos. -->
+                {{ entry.date_added|date:'d M, Y H:i' }}  <!-- Formata a data de criação da entrada de acordo com o formato especificado, exibindo dia, mês, ano e hora. -->
+                <small><a href="{% url 'poderoso_apps:edit_entry' entry.id %}">Editar</a></small>  <!-- Link que permite ao usuário editar a entrada, gerando o URL dinamicamente com o ID da entrada. -->
             </h4>
             <!-- Adição do texto-->
-            <div class="card-body">{{ entry.text|linebreaks }}</div>
+            <div class="card-body">{{ entry.text|linebreaks }}</div>  <!-- O corpo do card exibe o texto da entrada, utilizando a função `linebreaks` para converter quebras de linha em elementos HTML `<br>`. -->
           </div>
-        {% empty %}
-          <p>Não há tópicos criados.</p>
-        {% endfor %}
+        {% empty %}  <!-- Se não houver entradas, este bloco será exibido. -->
+          <p>Não há tópicos criados.</p>  <!-- Mensagem informativa caso não existam entradas para o tópico. -->
+        {% endfor %}  <!-- Fim do loop que itera sobre as entradas. -->
+    </ul>  <!-- Fim da lista não ordenada. -->
 
-{% endblock content %}
+{% endblock content %}  <!-- Fim do bloco de conteúdo principal da página. -->

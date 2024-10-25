@@ -1,72 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Poderoso App</title>
+    <!-- Define o tipo de documento como HTML5 e a linguagem do documento como inglês -->
+    <meta charset="utf-8">  <!-- Define a codificação de caracteres como UTF-8, que suporta a maioria dos caracteres. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">  <!-- Configura a viewport para responsividade, permitindo que o layout se ajuste em dispositivos móveis. -->
+    <title>Poderoso App</title>  <!-- Define o título que aparecerá na aba do navegador. -->
 
-    {% load django_bootstrap5 %}
-    {% bootstrap_css %}
-    {% bootstrap_javascript %}
-
+    {% load django_bootstrap5 %}  <!-- Carrega as tags e filtros do pacote django-bootstrap5, que facilita a utilização do Bootstrap no Django. -->
+    {% bootstrap_css %}  <!-- Gera os links necessários para incluir o CSS do Bootstrap na página. -->
+    {% bootstrap_javascript %}  <!-- Gera os links para incluir os scripts JavaScript do Bootstrap. -->
 </head>
 <body>
-    <nav class="navbar navbar-expand-md navbar-light bg-light mb-4 border">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="{% url 'poderoso_apps:index' %}">
+    <!-- Início da barra de navegação -->
+    <nav class="navbar navbar-expand-md navbar-light bg-light mb-4 border">  <!-- Cria uma barra de navegação utilizando classes do Bootstrap para estilo. -->
+        <div class="container-fluid">  <!-- Define um contêiner fluido que se ajusta ao tamanho da tela. -->
+            <a class="navbar-brand" href="{% url 'poderoso_apps:index' %}">  <!-- Cria um link para a página inicial usando a tag URL do Django. -->
                 Poderoso App</a>
             
-            <!-- Correção no data-bs-toggle -->
+            <!-- Botão para colapsar o menu em telas menores -->
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                 data-bs-target="#navbarCollapse" aria-controls="navbarCollapse"
-                aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
+                aria-expanded="false" aria-label="Toggle navigation">  <!-- Define um botão que, ao ser clicado, expande ou colapsa o menu. -->
+                <span class="navbar-toggler-icon"></span>  <!-- Ícone que aparece no botão. -->
             </button>
 
-            <div class="collapse navbar-collapse" id="navbarCollapse">
-                <ul class="navbar-nav me-auto mb-2 mb-md-0">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'poderoso_apps:topics' %}">
+            <div class="collapse navbar-collapse" id="navbarCollapse">  <!-- Início do menu colapsável. -->
+                <ul class="navbar-nav me-auto mb-2 mb-md-0">  <!-- Cria uma lista de navegação, que é automaticamente ajustada. -->
+                    <li class="nav-item">  <!-- Início de um item de navegação. -->
+                        <a class="nav-link" href="{% url 'poderoso_apps:topics' %}">  <!-- Link para a página de tópicos. -->
                             Topics</a>
                     </li>
                 </ul>
 
+            <div class="collapse navbar-collapse" id="navbarCollapse">
+                <ul class="navbar-nav me-auto mb-2 mb-md-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'poderoso_apps:planos_treino' %}">  <!-- Link para a página de planos de treino. -->
+                            Planos de Treino</a>
+                    </li>
+                </ul>
+
                 <!-- Links relacionados a Accounts -->
-                <ul class="navbar-nav ms-auto mb-2 mb-md-0">
-                    {% if user.is_authenticated %}
-                        <li class="nav-item">
-                            <span class="navbar-text me-2">Hello, {{ user.username }}</span>
+                <ul class="navbar-nav ms-auto mb-2 mb-md-0">  <!-- Lista de navegação alinhada à direita. -->
+                    {% if user.is_authenticated %}  <!-- Verifica se o usuário está autenticado. -->
+                        <li class="nav-item">  <!-- Item de navegação para usuários autenticados. -->
+                            <span class="navbar-text me-2">Hello, {{ user.username }}</span>  <!-- Exibe uma mensagem de boas-vindas ao usuário. -->
                         </li>
-                    {% else %}
+                    {% else %}  <!-- Se o usuário não estiver autenticado, exibe opções de registro e login. -->
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'accounts:register' %}">
+                            <a class="nav-link" href="{% url 'accounts:register' %}">  <!-- Link para a página de registro. -->
                                 Register</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'accounts:login' %}">
+                            <a class="nav-link" href="{% url 'accounts:login' %}">  <!-- Link para a página de login. -->
                                 Login</a>
                         </li>
-                    {% endif %}
-                    <li class="nav-item">
-                        {% if user.is_authenticated %}
-                        <form action="{% url 'accounts:logout' %}" method="post">
-                            {% csrf_token %}
-                            <button name="submit" class="btn btn-outline-secondary btn-sm">
+                    {% endif %}  <!-- Fim da verificação de autenticação. -->
+                    <li class="nav-item">  <!-- Item de navegação para logout. -->
+                        {% if user.is_authenticated %}  <!-- Verifica novamente se o usuário está autenticado. -->
+                        <form action="{% url 'accounts:logout' %}" method="post">  <!-- Cria um formulário para realizar logout. -->
+                            {% csrf_token %}  <!-- Gera um token CSRF para proteção contra ataques. -->
+                            <button name="submit" class="btn btn-outline-secondary btn-sm">  <!-- Botão para confirmar o logout. -->
                                 Logout</button>
                         </form>
-                        {% endif %}
+                        {% endif %}  <!-- Fim da verificação de autenticação. -->
                     </li>
                 </ul>
-            </div>
-        </div>
+            </div>  <!-- Fim do menu de navegação colapsável. -->
+        </div>  <!-- Fim do contêiner da barra de navegação. -->
     </nav>
 
-    <main class="container">
-        <div class="pb-2 mb-2 border-bottom">
-            {% block page_header %}{% endblock page_header %}
+    <main class="container">  <!-- Início da seção principal da página, com um contêiner que se ajusta ao tamanho da tela. -->
+        <div class="pb-2 mb-2 border-bottom">  <!-- Div com borda inferior, serve como cabeçalho da página. -->
+            {% block page_header %}{% endblock page_header %}  <!-- Bloco onde o cabeçalho da página pode ser definido em templates filhos. -->
         </div>
         <div>
-            {% block content %}{% endblock content %}
+            {% block content %}{% endblock content %}  <!-- Bloco onde o conteúdo da página será renderizado, podendo ser sobrescrito em templates filhos. -->
         </div>
     </main>
 </body>

@@ -1,14 +1,14 @@
-{% extends "poderoso_apps/base.html" %}
+{% extends "poderoso_apps/base.html" %}  <!-- Indica que este template estende o template base chamado base.html. Isso permite que o conteúdo definido aqui seja inserido nos blocos correspondentes do template base. -->
 
-{% block content %}
+{% block content %}  <!-- Início do bloco que substitui o conteúdo principal do template base. -->
 
-    <p><a href="{% url 'poderoso_apps:topic' topic.id %}">{{ topic }}</a></p>
-    <p>Editar tópico:</p>
+    <p><a href="{% url 'poderoso_apps:topic' topic.id %}">{{ topic }}</a></p>  <!-- Cria um link para a página do tópico correspondente, usando o ID do tópico atual. O texto do link é o nome do tópico (variável 'topic') passada ao contexto do template. -->
+    <p>Editar tópico:</p>  <!-- Título da seção de edição. -->
 
-    <form action="{% url 'poderoso_apps:edit_entry' entry.id %}" method="post">
-        {% csrf_token %}
-        {{ form.as_div }}
-        <button name="submit">Salvar Alterações</button>
-    </form>
+    <form action="{% url 'poderoso_apps:edit_entry' entry.id %}" method="post">  <!-- Início de um formulário que será enviado via método POST para a URL gerada pelo nome 'edit_entry', passando o ID da entrada a ser editada. -->
+        {% csrf_token %}  <!-- Gera um token CSRF para proteger contra ataques CSRF. -->
+        {{ form.as_div }}  <!-- Renderiza o formulário como uma série de elementos div. Essa abordagem permite que os campos do formulário sejam organizados em blocos separados. -->
+        <button name="submit">Salvar Alterações</button>  <!-- Botão para enviar o formulário, que terá o texto "Salvar Alterações". -->
+    </form>  <!-- Fim do formulário. -->
 
-{% endblock content %}
+{% endblock content %}  <!-- Fim do bloco de conteúdo. -->

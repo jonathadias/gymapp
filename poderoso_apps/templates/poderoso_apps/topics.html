@@ -1,26 +1,24 @@
-{% extends 'poderoso_apps/base.html' %}
+{% extends 'poderoso_apps/base.html' %}  <!-- Este template herda o layout e a estrutura do template base chamado base.html. Isso permite manter a consistência visual em todas as páginas do aplicativo. -->
 
-{% block page_header %}
+{% block page_header %}  <!-- Início do bloco que será substituído na parte superior da página. -->
+    <p>Topics</p>  <!-- Exibe o título "Topics" na página. -->
+{% endblock page_header %}  <!-- Fim do bloco que define o cabeçalho da página. -->
 
-    <p>Topics</p>
-{% endblock page_header %}
+{% block content %}  <!-- Início do bloco de conteúdo principal da página. -->
+    <ul class="list-group border-bottom pb-2 mb-4">  <!-- Cria uma lista não ordenada com a classe de estilo "list-group" do Bootstrap, que dá um estilo específico aos itens da lista. -->
+        {% for topic in topics %}  <!-- Início de um loop que itera sobre cada objeto 'topic' na lista 'topics' fornecida pelo contexto da view. -->
+            <li class="list-group-item border-0">  <!-- Cria um item de lista para cada tópico, removendo a borda com a classe "border-0". -->
+                <a href="{% url 'poderoso_apps:topic' topic.id %}">  <!-- Cria um link que leva à página do tópico específico. O comando {% url %} gera a URL correspondente usando o nome da view e o ID do tópico. -->
+                    {{ topic.text }}  <!-- Exibe o texto do tópico, que é uma propriedade do objeto 'topic'. -->
+                </a>  <!-- Fecha a tag do link. -->
+            </li>  <!-- Fecha o item da lista. -->
+        {% empty %}  <!-- Esta parte do template será exibida se a lista 'topics' estiver vazia. -->
+            <li class="list-group-item border-0">  <!-- Cria um item de lista informando que não há tópicos. -->
+                Nenhum tópico foi adicionado ainda  <!-- Mensagem exibida quando não existem tópicos. -->
+            </li>  <!-- Fecha o item da lista. -->
+        {% endfor %}  <!-- Fim do loop que itera sobre os tópicos. -->
+    </ul>  <!-- Fecha a lista não ordenada. -->
 
-{% block content %}
-    <ul class="list-group border-bottom pb-2 mb-4">
-        {% for topic in topics %}
-            <li class="list-group-item border-0">
-                <a href="{% url 'poderoso_apps:topic' topic.id %}">
-                    {{ topic.text }}
-                </a>
-            </li>
-        {% empty %}
-            <li class="list-group-item border-0">
-                Nenhum tópico foi adicionado ainda
-            </li>
-        {% endfor %}
-    </ul>
+    <a href="{% url 'poderoso_apps:new_topic' %}">Novo tópico</a>  <!-- Link para a página que permite a criação de um novo tópico. O comando {% url %} gera a URL correspondente usando o nome da view. -->
 
-        <a href="{% url 'poderoso_apps:new_topic' %}">Novo tópico</a>
-
-{% endblock content %}
-
+{% endblock content %}  <!-- Fim do bloco de conteúdo principal da página. -->

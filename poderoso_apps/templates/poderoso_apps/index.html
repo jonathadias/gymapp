@@ -1,14 +1,15 @@
-{% extends 'poderoso_apps/base.html' %}
+{% extends 'poderoso_apps/base.html' %}  <!-- Indica que este template estende o template base chamado base.html, permitindo que o conteúdo definido aqui seja inserido nos blocos correspondentes do template base. -->
 
-{% block page_header %}
-    <div class="p-3 mb-4 bg-light border rounded-3">
-        <div class="container-fluid py-4">
-            <h1 class="display-3">Monitore seu progresso</h1>
-
+{% block page_header %}  <!-- Início do bloco que substitui o cabeçalho da página no template base. -->
+    <div class="p-3 mb-4 bg-light border rounded-3">  <!-- Cria um contêiner para o cabeçalho, com classes do Bootstrap para adicionar espaçamento, fundo claro, borda e cantos arredondados. -->
+        <div class="container-fluid py-4">  <!-- Um contêiner fluido que permite que o conteúdo se expanda em toda a largura disponível, com padding vertical (superior e inferior) de 4 unidades. -->
+            <h1 class="display-3">Monitore seu progresso</h1>  <!-- Título da página, estilizado como um título de exibição grande, atraente e de destaque. -->
+            
             <p class="lead">Make your own Learning Log, and keep a list of the
                 topics you're learning about. Whenever you learn something new
-                about a topic, make an entry summarizing what you've learned.</p>
-            <a class="btn btn-primary btn-lg mt-1" href="{% url 'accounts:register' %}"^>Registre-se &raquo;</a>
+                about a topic, make an entry summarizing what you've learned.</p>  <!-- Parágrafo explicativo que fornece uma introdução ao propósito da aplicação, utilizando a classe "lead" do Bootstrap para dar destaque ao texto. -->
+
+            <a class="btn btn-primary btn-lg mt-1" href="{% url 'accounts:register' %}">Registre-se &raquo;</a>  <!-- Cria um botão estilizado com Bootstrap que leva à página de registro. O texto do botão é "Registre-se" e inclui um símbolo de seta direita (») para indicar que o usuário será direcionado para outra página. -->
         </div>
     </div>
-{% endblock page_header %}
+{% endblock page_header %}  <!-- Fim do bloco de cabeçalho da página. -->

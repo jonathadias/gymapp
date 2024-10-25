@@ -1,14 +1,15 @@
-{% extends "poderoso_apps/base.html" %}
+{% extends "poderoso_apps/base.html" %}  <!-- Indica que este template estende o template base chamado base.html, permitindo que o conteúdo definido aqui seja inserido nos blocos correspondentes do template base. -->
 
-{% block content %}
+{% block content %}  <!-- Início do bloco que contém o conteúdo principal da página. -->
 
-    <p><a href="{% url 'poderoso_apps:topic' topic.id %}">{{ topic }}</a></p>
+    <p><a href="{% url 'poderoso_apps:topic' topic.id %}">{{ topic }}</a></p>  <!-- Cria um link para a página do tópico atual. O texto do link é o nome do tópico, e a URL é gerada usando a tag {% url %} com o ID do tópico. -->
 
-    <p>Nova entrada:</p>
-    <form action="{% url 'poderoso_apps:new_entry' topic.id %}" method='post'>
-        {% csrf_token %}
-        {{ form.as_div}}
-        <button name="submit">Nova entrada</button>
-    </form>
+    <p>Nova entrada:</p>  <!-- Título que indica que o usuário pode adicionar uma nova entrada ao tópico. -->
 
-    {% endblock content %}
+    <form action="{% url 'poderoso_apps:new_entry' topic.id %}" method='post'>  <!-- Cria um formulário que usa o método POST para enviar dados. O atributo action define a URL de destino, que é gerada dinamicamente usando a tag {% url %} com o ID do tópico. -->
+        {% csrf_token %}  <!-- Adiciona um token CSRF (Cross-Site Request Forgery) para proteção contra ataques de falsificação de solicitação entre sites. Este token deve ser incluído em todos os formulários que enviam dados usando o método POST. -->
+        {{ form.as_div}}  <!-- Renderiza o formulário como uma série de divs, facilitando a personalização e o estilo. A variável `form` contém os campos do formulário a serem exibidos. -->
+        <button name="submit">Nova entrada</button>  <!-- Botão para enviar o formulário, permitindo que o usuário crie uma nova entrada para o tópico. -->
+    </form>  <!-- Fim do formulário. -->
+
+{% endblock content %}  <!-- Fim do bloco de conteúdo principal da página. -->

@@ -1,6 +1,14 @@
-from django.contrib import admin
-from .models import Topic, Entry
+# Importa o módulo admin do Django, que fornece funcionalidades para criar interfaces administrativas.
+from django.contrib import admin  
+# Importa os modelos que serão registrados no painel administrativo.
+from .models import Topic, Entry, PlanoTreino, Exercicio  
 
-admin.site.register(Topic)
-admin.site.register(Entry)
-# Register your models here.
+# Registra o modelo Topic no painel administrativo do Django.
+admin.site.register(Topic)  
+# Registra o modelo Entry no painel administrativo do Django.
+admin.site.register(Entry)  
+# Registra o modelo PlanoTreino no painel administrativo do Django.
+admin.site.register(PlanoTreino)  
+# Registra o modelo Exercicio no painel administrativo do Django.
+admin.site.register(Exercicio)  
+# Comentário indicando que aqui é o local para registrar modelos adicionais, se necessário.

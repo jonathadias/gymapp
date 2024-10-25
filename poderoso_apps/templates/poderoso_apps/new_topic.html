@@ -1,14 +1,13 @@
-{% extends 'poderoso_apps/base.html' %}
+{% extends 'poderoso_apps/base.html' %}  <!-- Indica que este template estende o template base chamado base.html, permitindo que o conteúdo definido aqui seja inserido nos blocos correspondentes do template base. -->
 
-{% block content %}
-    <p> Adicionar um novo tópico:</p>
+{% block content %}  <!-- Início do bloco que contém o conteúdo principal da página. -->
 
-    <form action="{% url 'poderoso_apps:new_topic' %}" method='post'>
-        {% csrf_token %}
-        {{ form.as_div }}
-        <button name="submit">Novo tópico</button>
-    </form>
+    <p> Adicionar um novo tópico:</p>  <!-- Um parágrafo que serve como um título, indicando ao usuário que ele pode adicionar um novo tópico. -->
 
-{% endblock content %}
+    <form action="{% url 'poderoso_apps:new_topic' %}" method='post'>  <!-- Cria um formulário que usa o método POST para enviar dados. O atributo action define a URL de destino, que é gerada dinamicamente usando a tag {% url %} para apontar para a view responsável pela criação de novos tópicos. -->
+        {% csrf_token %}  <!-- Adiciona um token CSRF (Cross-Site Request Forgery) para proteção contra ataques de falsificação de solicitação entre sites. Este token deve ser incluído em todos os formulários que enviam dados usando o método POST. -->
+        {{ form.as_div }}  <!-- Renderiza o formulário como uma série de divs, facilitando a personalização e o estilo. A variável `form` contém os campos do formulário a serem exibidos. -->
+        <button name="submit">Novo tópico</button>  <!-- Botão para enviar o formulário, permitindo que o usuário crie um novo tópico. -->
+    </form>  <!-- Fim do formulário. -->
 
-
+{% endblock content %}  <!-- Fim do bloco de conteúdo principal da página. -->

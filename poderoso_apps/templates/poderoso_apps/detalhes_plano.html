@@ -1,0 +1,36 @@
+{% extends 'poderoso_apps/base.html' %}  <!-- Indica que este template estende o template base chamado base.html. Isso permite que o conteúdo definido aqui seja inserido nos blocos correspondentes do template base. -->
+
+{% block page_header %}  <!-- Início do bloco que substitui o cabeçalho da página definido no template base. -->
+    <h1>{{ plano.nome }}</h1>  <!-- Exibe o nome do plano, acessando o atributo 'nome' do objeto 'plano' passado ao contexto do template. -->
+    <p>{{ plano.descricao }}</p>  <!-- Exibe a descrição do plano, acessando o atributo 'descricao' do objeto 'plano'. -->
+
+    <h2>Exercícios:</h2>  <!-- Título para a seção de exercícios. -->
+{% endblock page_header %}  <!-- Fim do bloco de cabeçalho. -->
+
+{% block content %}  <!-- Início do bloco que substitui o conteúdo principal do template base. -->
+<form method="GET" action="{% url 'poderoso_apps:detalhes_plano' %}">  <!-- Início de um formulário que será enviado via método GET para a URL gerada pelo nome 'detalhes_plano'. -->
+    <label for="planos">Planos:</label>  <!-- Rótulo para o campo de seleção de planos. -->
+    <select name="plano_id" id="planos" onchange="this.form.submit()">  <!-- Cria um menu suspenso (select) para escolher um plano. O formulário será enviado automaticamente quando o usuário selecionar uma opção (onchange). -->
+        <option value=""> --- Selecione --- </option>  <!-- Opção padrão que solicita ao usuário que selecione um plano. -->
+        {% for plano in planos %}  <!-- Início de um loop que itera sobre a lista de planos fornecida no contexto. -->
+            <option value="{{ plano.id }}" {% if plano.id == plano_id %}selected{% endif %}> {{ plano.nome }} </option>  <!-- Para cada plano, cria uma opção no select. Se o id do plano atual for igual ao plano_id, essa opção será marcada como selecionada. -->
+        {% endfor %}  <!-- Fim do loop. -->
+    </select>  <!-- Fim do menu suspenso. -->
+</form>
+</br>  <!-- Quebra de linha para espaçamento. -->
+<ul>  <!-- Início de uma lista não ordenada para exibir os exercícios. -->
+    {% for exercicio in exercicios %}  <!-- Início de um loop que itera sobre a lista de exercícios fornecida no contexto. -->
+      <li>  <!-- Início de um item de lista. -->
+        <p>{{ exercicio.nome }}</p>  <!-- Exibe o nome do exercício. -->
+        <p>Séries: {{ exercicio.series }} | Repetições: {{ exercicio.repeticoes }}</p>  <!-- Exibe informações sobre séries e repetições do exercício. -->
+        <p>Intervalo: {{ exercicio.intervalo }}</p>  <!-- Exibe o intervalo entre as séries do exercício. -->
+        <form method="POST">  <!-- Início de um formulário para enviar dados via método POST. Isso geralmente é usado para ações que alteram o estado do servidor. -->
+          {% csrf_token %}  <!-- Gera um token CSRF para proteger contra ataques CSRF. -->
+          <input type="hidden" name="exercicio_id" value="{{ exercicio.id }}">  <!-- Campo oculto que contém o ID do exercício, permitindo que o servidor identifique qual exercício está sendo atualizado. -->
+          <input type="checkbox" name="concluido" {% if exercicio.concluido %}checked{% endif %} onchange="this.form.submit()"> Concluído  <!-- Checkbox que indica se o exercício foi concluído. Se o exercício estiver concluído, a caixa será marcada. O formulário será enviado automaticamente quando o estado do checkbox mudar. -->
+        </form>  <!-- Fim do formulário de exercício. -->
+      </li>  <!-- Fim do item de lista. -->
+    {% endfor %}  <!-- Fim do loop de exercícios. -->
+  </ul>  <!-- Fim da lista de exercícios. -->
+
+{% endblock content %}  <!-- Fim do bloco de conteúdo. -->
