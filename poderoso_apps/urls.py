@@ -27,7 +27,7 @@ urlpatterns = [
     path('edit_entry/<int:entry_id>/', views.edit_entry, name='edit_entry'),  # Permite editar uma entrada existente, capturando seu ID.
 
     # Exibição da lista de planos de treino
-    path('planos_treino/', views.planos_treino, name='planos_treino'),  # Acessa /planos_treino/ para exibir todos os planos de treino.
+    path('planos_treinos/', views.planos_treinos, name='planos_treinos'),  # Acessa /planos_treino/ para exibir todos os planos de treino.
 
     # Exibição dos detalhes de um plano de treino
     path('detalhes_plano/', views.detalhes_planos, name='detalhes_plano'),  # Acessa /detalhes_plano/ para mostrar os detalhes de um plano específico.

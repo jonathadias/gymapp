@@ -5,7 +5,8 @@
 {% endblock page_header %}  <!-- Fim do bloco de cabeçalho da página. -->
 
 {% block content %}  <!-- Início do bloco de conteúdo principal da página. -->
-    <form method="GET" action="{% url 'poderoso_apps:detalhes_plano' %}">  <!-- Cria um formulário que usa o método GET para enviar dados. O atributo action define a URL de destino para onde os dados do formulário serão enviados. A URL é gerada dinamicamente usando a tag {% url %}. -->
+    
+    <form method="GET" action="{% url 'poderoso_apps:detalhes_plano' %}">    
         <label for="planos">Planos:</label>  <!-- Rótulo para o campo de seleção, associando o texto "Planos:" ao campo de seleção por meio do atributo for. -->
         <select name="plano_id" id="planos" onchange="this.form.submit()">  <!-- Cria um campo de seleção (dropdown) para os planos de treino. O atributo onchange é acionado quando o usuário seleciona um plano, fazendo com que o formulário seja enviado automaticamente. -->
             <option value=""> --- Selecione --- </option>  <!-- Opção padrão exibida quando nenhum plano é selecionado. -->
