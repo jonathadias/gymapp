@@ -8,15 +8,15 @@
 {% endblock page_header %}  <!-- Fim do bloco de cabeçalho. -->
 
 {% block content %}  <!-- Início do bloco que substitui o conteúdo principal do template base. -->
-<form method="GET" action="{% url 'poderoso_apps:detalhes_plano' %}">  <!-- Início de um formulário que será enviado via método GET para a URL gerada pelo nome 'detalhes_plano'. -->
-    <label for="planos">Planos:</label>  <!-- Rótulo para o campo de seleção de planos. -->
-    <select name="plano_id" id="planos" onchange="this.form.submit()">  <!-- Cria um menu suspenso (select) para escolher um plano. O formulário será enviado automaticamente quando o usuário selecionar uma opção (onchange). -->
-        <option value=""> --- Selecione --- </option>  <!-- Opção padrão que solicita ao usuário que selecione um plano. -->
-        {% for plano in planos %}  <!-- Início de um loop que itera sobre a lista de planos fornecida no contexto. -->
-            <option value="{{ plano.id }}" {% if plano.id == plano_id %}selected{% endif %}> {{ plano.nome }} </option>  <!-- Para cada plano, cria uma opção no select. Se o id do plano atual for igual ao plano_id, essa opção será marcada como selecionada. -->
-        {% endfor %}  <!-- Fim do loop. -->
-    </select>  <!-- Fim do menu suspenso. -->
-</form>
+
+<div>
+  <p>PROGRESSO: {{ progresso|floatformat:0 }}%</p>
+  <div style="background-color: #ddd; width: 100%; height: 20px;">
+    <div style="background-color: #4CAF40; width: {{ progresso }}%; height: 100%;"></div>
+  </div>
+  <p>Tempo Estimado: 45:002'</p>
+</div>
+
 </br>  <!-- Quebra de linha para espaçamento. -->
 <ul>  <!-- Início de uma lista não ordenada para exibir os exercícios. -->
     {% for exercicio in exercicios %}  <!-- Início de um loop que itera sobre a lista de exercícios fornecida no contexto. -->

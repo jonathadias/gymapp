@@ -133,13 +133,13 @@ def edit_entry(request, entry_id):
     return render(request, 'poderoso_apps/edit_entry.html', context)
 
 
-def planos_treino(request):
+def planos_treinos(request):
     """Exibe a lista de planos de treino disponíveis."""
     # Obtém todos os planos de treino do banco de dados.
     planos = PlanoTreino.objects.all()  
-    
+    plano_id = request.GET.get('plano_id')
     # Renderiza a lista de planos, enviando os dados para o template.
-    return render(request, 'poderoso_apps/planos_treino.html', {'planos': planos})  
+    return render(request, 'poderoso_apps/planos_treinos.html', {'planos': planos, 'plano_id': plano_id})  
 
 
 def detalhes_planos(request):
@@ -158,7 +158,15 @@ def detalhes_planos(request):
         exercicios = None  # Não há exercícios se não houver plano.
 
     # Obtém todos os planos de treino disponíveis no banco de dados.
-    planos = PlanoTreino.objects.all()  
+    planos = PlanoTreino.objects.all() 
+    
+    if exercicios:
+        total_exercicios = exercicios.count()
+        exercicios_concluidos = exercicios.filter(concluido=True).count()
+        progresso = (exercicios_concluidos / total_exercicios) * 100 if total_exercicios > 0 else 0
+    else:
+        progresso = 0
+
 
     # Verifica se a requisição é do tipo POST, indicando que o usuário está tentando atualizar o status de um exercício.
     if request.method == 'POST':
@@ -178,6 +186,7 @@ def detalhes_planos(request):
     return render(request, 'poderoso_apps/detalhes_plano.html', {
         'plano': plano,
         'exercicios': exercicios,
-        'planos': planos
+        'planos': planos,
+        'progresso': progresso
     })
 
