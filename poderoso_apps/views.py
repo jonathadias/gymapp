@@ -4,6 +4,8 @@ from .models import Topic, Entry, PlanoTreino, Exercicio  # Importa os modelos q
 from .forms import TopicForm, EntryForm  # Importa os formulários que lidam com os dados de entrada
 from django.contrib.auth.decorators import login_required  # Importa o decorador que restringe acesso a usuários logados
 from django.http import Http404  # Importa a classe para gerar erros 404
+from django.http import JsonResponse
+from django.urls import reverse
 
 
 def index(request):
@@ -144,49 +146,45 @@ def planos_treinos(request):
 
 def detalhes_planos(request):
     """Exibe detalhes de um plano de treino específico e permite marcar exercícios como concluídos."""
-    # Obtém o ID do plano a partir da requisição GET, que é geralmente passado na URL.
-    plano_id = request.GET.get('plano_id')  
+    plano_id = request.GET.get('plano_id')
     
-    if plano_id:  # Se o ID do plano foi fornecido
-        # Tenta obter o plano específico. Se não encontrar, retorna um erro 404.
-        plano = get_object_or_404(PlanoTreino, id=plano_id)  
-        
-        # Obtém todos os exercícios associados ao plano.
-        exercicios = plano.exercicios.all()  
+    if plano_id:
+        plano = get_object_or_404(PlanoTreino, id=plano_id)
+        exercicios = plano.exercicios.all()
     else:
-        plano = None  # Se não houver ID, não existe plano.
-        exercicios = None  # Não há exercícios se não houver plano.
+        plano = None
+        exercicios = None
 
-    # Obtém todos os planos de treino disponíveis no banco de dados.
-    planos = PlanoTreino.objects.all() 
+    planos = PlanoTreino.objects.all()
     
     if exercicios:
         total_exercicios = exercicios.count()
         exercicios_concluidos = exercicios.filter(concluido=True).count()
         progresso = (exercicios_concluidos / total_exercicios) * 100 if total_exercicios > 0 else 0
+        tempo_total_estimado = plano.tempo_estimado
+        tempo_por_exercicio = tempo_total_estimado / total_exercicios if total_exercicios > 0 else 0
+        tempo_restante = tempo_total_estimado - (exercicios_concluidos * tempo_por_exercicio)
+
     else:
         progresso = 0
+        tempo_restante = 0
 
-
-    # Verifica se a requisição é do tipo POST, indicando que o usuário está tentando atualizar o status de um exercício.
     if request.method == 'POST':
-        exercicio_id = request.POST.get('exercicio_id')  # Obtém o ID do exercício que o usuário está tentando marcar como concluído.
+        exercicio_id = request.POST.get('exercicio_id')
         
-        # Obtém o exercício específico. Se não encontrar, retorna um erro 404.
-        exercicio = get_object_or_404(Exercicio, id=exercicio_id, plano=plano)  
-        
-        # Inverte o status de 'concluído' do exercício. Se estava como concluído, agora será marcado como não concluído, e vice-versa.
-        exercicio.concluido = not exercicio.concluido  
-        
-        # Salva as alterações no banco de dados.
-        exercicio.save()  # Atualiza o exercício no banco de dados para refletir o novo status.
-        # Redireciona para evitar que o usuário atualize o status novamente se ele recarregar a página.
-    
-    # Renderiza a página com detalhes do plano, enviando o plano, seus exercícios e todos os planos disponíveis para o template.
+        if exercicio_id and plano:
+            exercicio = get_object_or_404(Exercicio, id=exercicio_id, plano=plano)
+            # Inverte o estado atual do exercício
+            exercicio.concluido = not exercicio.concluido
+            exercicio.save()
+            
+            # Redireciona de volta para a mesma página mantendo o plano_id
+            return redirect(f"{reverse('poderoso_apps:detalhes_plano')}?plano_id={plano_id}")
+
     return render(request, 'poderoso_apps/detalhes_plano.html', {
         'plano': plano,
         'exercicios': exercicios,
         'planos': planos,
-        'progresso': progresso
+        'progresso': progresso,
+        'tempo_restante': tempo_restante
     })
-
