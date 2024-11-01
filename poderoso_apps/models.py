@@ -74,8 +74,8 @@ class PlanoTreino(models.Model):
     # Define o campo 'descricao' como um TextField que pode ser nulo ou em branco.
     descricao = models.TextField(null=True, blank=True)  
     # Define o campo 'owner' como uma chave estrangeira que referencia o modelo User.
-    owner = models.ForeignKey(User, on_delete=CASCADE)  # Usuário que criou o plano.
-
+    owner = models.ForeignKey(User, on_delete=CASCADE)  # Usuário que criou o plano. 
+    tempo_estimado = models.PositiveIntegerField(help_text="Tempo em minutos")   
     def __str__(self):
         return self.nome  # Retorna o nome do plano de treino.
 
@@ -86,6 +86,7 @@ class Exercicio(models.Model):
     plano = models.ForeignKey(PlanoTreino, related_name='exercicios', on_delete=CASCADE)  
     # Define o campo 'nome' como um CharField com limite de 200 caracteres.
     nome = models.CharField(max_length=200)
+    
     # Define o campo 'series' como um IntegerField para armazenar o número de séries do exercício.
     series = models.IntegerField()  
     # Define o campo 'repeticoes' como um IntegerField para armazenar o número de repetições do exercício.
