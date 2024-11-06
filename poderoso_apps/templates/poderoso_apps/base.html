@@ -41,6 +41,15 @@
                     </li>
                 </ul>
 
+            <div class="collapse navbar-collapse" id="navbarCollapse">
+                <ul class="navbar-nav me-auto mb-2 mb-md-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'poderoso_apps:calculotmb' %}">  
+                            Calculo TMB
+                        </a>
+                    </li>
+                </ul>
+
                 <!-- Links relacionados a Accounts -->
                 <ul class="navbar-nav ms-auto mb-2 mb-md-0">  <!-- Lista de navegação alinhada à direita. -->
                     {% if user.is_authenticated %}  <!-- Verifica se o usuário está autenticado. -->
@@ -67,6 +76,7 @@
                         {% endif %}  <!-- Fim da verificação de autenticação. -->
                     </li>
                 </ul>
+            </div>
             </div>
             </div>  <!-- Fim do menu de navegação colapsável. -->
         </div>  <!-- Fim do contêiner da barra de navegação. -->

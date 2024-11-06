@@ -1,0 +1,14 @@
+{% extends 'poderoso_apps/base.html' %}
+
+{% block content %}
+    <form method="post">
+        {% csrf_token %}
+        <div>
+            <h5> Idade </h5>
+            {{ form.idade }}
+            <h5> Peso </h5>
+            {{ form.peso }}
+        </div>
+        <button type="submit"> Enviar</button>
+    </form>
+{% endblock content %}

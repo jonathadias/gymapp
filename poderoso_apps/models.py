@@ -95,6 +95,7 @@ class Exercicio(models.Model):
     intervalo = models.CharField(max_length=50)  
     # Define o campo 'concluido' como um BooleanField que indica se o exercício foi concluído ou não.
     concluido = models.BooleanField(default=False)  # Padrão é False.
+    imagens = models.ImageField(upload_to='media', null=True, blank=True)
 
     def __str__(self):
         return self.nome  # Retorna o nome do exercício.

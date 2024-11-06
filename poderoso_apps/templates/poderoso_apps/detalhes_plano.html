@@ -20,6 +20,9 @@
 <ul>
     {% for exercicio in exercicios %}
       <li>
+        {% if exercicio.imagens %}
+        <img src="{{ exercicio.imagens.url }}" alt="ImgEXER" width="250">
+        {% endif %}
         <p>{{ exercicio.nome }}</p>
         <p>Séries: {{ exercicio.series }} | Repetições: {{ exercicio.repeticoes }}</p>
         <p>Intervalo: {{ exercicio.intervalo }}</p>
