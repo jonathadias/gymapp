@@ -1,36 +1,41 @@
-{% extends 'poderoso_apps/base.html' %}  <!-- Indica que este template estende o template base chamado base.html. Isso permite que o conteúdo definido aqui seja inserido nos blocos correspondentes do template base. -->
+<!-- detalhes.html -->
+{% extends 'poderoso_apps/base.html' %}
 
-{% block page_header %}  <!-- Início do bloco que substitui o cabeçalho da página definido no template base. -->
-    <h1>{{ plano.nome }}</h1>  <!-- Exibe o nome do plano, acessando o atributo 'nome' do objeto 'plano' passado ao contexto do template. -->
-    <p>{{ plano.descricao }}</p>  <!-- Exibe a descrição do plano, acessando o atributo 'descricao' do objeto 'plano'. -->
+{% block page_header %}
+    <h1>{{ plano.nome }}</h1>
+    <p>{{ plano.descricao }}</p>
+    <h2>Exercícios:</h2>
+{% endblock page_header %}
 
-    <h2>Exercícios:</h2>  <!-- Título para a seção de exercícios. -->
-{% endblock page_header %}  <!-- Fim do bloco de cabeçalho. -->
-
-{% block content %}  <!-- Início do bloco que substitui o conteúdo principal do template base. -->
-
+{% block content %}
 <div>
   <p>PROGRESSO: {{ progresso|floatformat:0 }}%</p>
-  <div style="background-color: #ddd; width: 100%; height: 20px;">
-    <div style="background-color: #4CAF40; width: {{ progresso }}%; height: 100%;"></div>
+  <div style="background-color: #ff0000; width: 100%; height: 20px;">
+    <div style="background-color: #000000; width: {{ progresso }}%; height: 100%;"></div>
   </div>
-  <p>Tempo Estimado: 45:002'</p>
+  <p>Tempo Restante: {{ tempo_restante|floatformat:2 }} minutos</p>
 </div>
 
-</br>  <!-- Quebra de linha para espaçamento. -->
-<ul>  <!-- Início de uma lista não ordenada para exibir os exercícios. -->
-    {% for exercicio in exercicios %}  <!-- Início de um loop que itera sobre a lista de exercícios fornecida no contexto. -->
-      <li>  <!-- Início de um item de lista. -->
-        <p>{{ exercicio.nome }}</p>  <!-- Exibe o nome do exercício. -->
-        <p>Séries: {{ exercicio.series }} | Repetições: {{ exercicio.repeticoes }}</p>  <!-- Exibe informações sobre séries e repetições do exercício. -->
-        <p>Intervalo: {{ exercicio.intervalo }}</p>  <!-- Exibe o intervalo entre as séries do exercício. -->
-        <form method="POST">  <!-- Início de um formulário para enviar dados via método POST. Isso geralmente é usado para ações que alteram o estado do servidor. -->
-          {% csrf_token %}  <!-- Gera um token CSRF para proteger contra ataques CSRF. -->
-          <input type="hidden" name="exercicio_id" value="{{ exercicio.id }}">  <!-- Campo oculto que contém o ID do exercício, permitindo que o servidor identifique qual exercício está sendo atualizado. -->
-          <input type="checkbox" name="concluido" {% if exercicio.concluido %}checked{% endif %} onchange="this.form.submit()"> Concluído  <!-- Checkbox que indica se o exercício foi concluído. Se o exercício estiver concluído, a caixa será marcada. O formulário será enviado automaticamente quando o estado do checkbox mudar. -->
-        </form>  <!-- Fim do formulário de exercício. -->
-      </li>  <!-- Fim do item de lista. -->
-    {% endfor %}  <!-- Fim do loop de exercícios. -->
-  </ul>  <!-- Fim da lista de exercícios. -->
-
-{% endblock content %}  <!-- Fim do bloco de conteúdo. -->
+</br>
+<ul>
+    {% for exercicio in exercicios %}
+      <li>
+        <p>{{ exercicio.nome }}</p>
+        <p>Séries: {{ exercicio.series }} | Repetições: {{ exercicio.repeticoes }}</p>
+        <p>Intervalo: {{ exercicio.intervalo }}</p>
+        
+        <form method="POST" action="{% url 'poderoso_apps:detalhes_plano' %}?plano_id={{ plano.id }}">
+          {% csrf_token %}
+          <input type="hidden" name="exercicio_id" value="{{ exercicio.id }}">
+          <input type="checkbox" 
+                 name="concluido"
+                 id="concluido-{{ exercicio.id }}" 
+                 value="True"
+                 onchange="this.form.submit();"
+                 {% if exercicio.concluido %}checked{% endif %}>
+          <label for="concluido-{{ exercicio.id }}">Concluído</label>
+        </form>
+      </li>
+    {% endfor %}
+</ul>
+{% endblock content %}
