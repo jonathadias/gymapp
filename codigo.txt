@@ -1,0 +1,532 @@
+# Importa funções e classes necessárias do Django
+from django.shortcuts import get_object_or_404, render, redirect  # Funções para renderizar páginas e redirecionar
+from .models import Topic, Entry, PlanoTreino, Exercicio  # Importa os modelos que representam os dados no banco de dados
+from .forms import TopicForm, EntryForm  # Importa os formulários que lidam com os dados de entrada
+from django.contrib.auth.decorators import login_required  # Importa o decorador que restringe acesso a usuários logados
+from django.http import Http404  # Importa a classe para gerar erros 404
+
+
+def index(request):
+    """Renderiza a página inicial do aplicativo."""
+    # A função 'render()' combina um template HTML com um dicionário de dados e retorna uma resposta ao navegador.
+    # Aqui, 'poderoso_apps/index.html' é o caminho para o template e 'request' é a solicitação HTTP.
+    return render(request, 'poderoso_apps/index.html')
+
+
+@login_required  # Garante que apenas usuários logados possam acessar esta função
+def topics(request):
+    """Exibe a lista de tópicos do usuário logado."""
+    # 'Topic.objects.filter()' recupera todos os tópicos do banco de dados que pertencem ao usuário logado.
+    topics = Topic.objects.filter(owner=request.user).order_by('date_added')  # Ordena os tópicos pela data de adição.
+    
+    # 'context' é um dicionário que contém os dados que serão passados para o template.
+    context = {'topics': topics}  # Aqui, associamos a lista de tópicos à chave 'topics'.
+    
+    # 'render()' retorna uma resposta ao navegador, renderizando o template 'poderoso_apps/topics.html' com o contexto fornecido.
+    return render(request, 'poderoso_apps/topics.html', context)
+
+
+@login_required  # Protege a função para garantir que o usuário esteja logado
+def topic(request, topic_id):
+    """Exibe os detalhes de um tópico específico pelo seu ID."""
+    # 'get_object_or_404()' tenta obter o tópico correspondente ao ID. Se não encontrar, retorna um erro 404.
+    topic = get_object_or_404(Topic, id=topic_id)
+    
+    # Aqui, verificamos se o tópico pertence ao usuário que está logado. Se não pertencer, levantamos um erro 404.
+    if topic.owner != request.user:
+        raise Http404  # Lança um erro 404 para indicar que o recurso não foi encontrado.
+    
+    # Obtém todas as entradas associadas a este tópico, ordenando-as da mais recente para a mais antiga.
+    entries = topic.entry_set.order_by('-date_added')
+    
+    # Cria um dicionário de contexto com o tópico e suas entradas, que será utilizado pelo template.
+    context = {'topic': topic, 'entries': entries}  
+    
+    # Renderiza a página do tópico, retornando o template 'poderoso_apps/topic.html' com o contexto.
+    return render(request, 'poderoso_apps/topic.html', context)
+
+
+@login_required  # Garante que o usuário esteja logado para acessar essa função
+def new_topic(request):
+    """Exibe um formulário para criar um novo tópico."""
+    if request.method != 'POST':  # Verifica se a requisição não é do tipo POST
+        # Se não houver dados enviados, cria um formulário vazio para o novo tópico.
+        form = TopicForm()  
+    else:
+        # Se a requisição for do tipo POST, significa que o usuário está tentando enviar dados para criar um novo tópico.
+        form = TopicForm(data=request.POST)  # Preenche o formulário com os dados que foram enviados.
+        
+        # 'is_valid()' verifica se os dados do formulário estão corretos (como se todos os campos obrigatórios foram preenchidos).
+        if form.is_valid():  
+            new_topic = form.save(commit=False)  # Salva o tópico, mas não o envia ao banco de dados ainda.
+            new_topic.owner = request.user  # Associa o novo tópico ao usuário logado, definindo o proprietário.
+            new_topic.save()  # Agora salva o novo tópico no banco de dados.
+            
+            # Redireciona o usuário para a lista de tópicos após criar o novo tópico.
+            return redirect('poderoso_apps:topics')  
+    
+    # Se o formulário não for válido ou se não houver dados, mostra o formulário novamente.
+    context = {'form': form}  # Prepara o contexto para renderizar o formulário.
+    
+    # Renderiza a página para criar um novo tópico, enviando o contexto.
+    return render(request, 'poderoso_apps/new_topic.html', context)
+
+
+@login_required  # Garante que apenas usuários logados possam acessar esta função
+def new_entry(request, topic_id):
+    """Exibe um formulário para criar uma nova entrada em um tópico específico."""
+    # Obtém o tópico específico usando o ID fornecido na URL.
+    topic = get_object_or_404(Topic, id=topic_id)  
+    
+    if request.method != 'POST':  # Verifica se a requisição não é do tipo POST
+        # Se não houver dados enviados, cria um formulário vazio para a nova entrada.
+        form = EntryForm()  
+    else:
+        # Se a requisição for do tipo POST, significa que o usuário enviou dados para criar uma nova entrada.
+        form = EntryForm(data=request.POST)  # Preenche o formulário com os dados que foram enviados.
+        
+        # Verifica se os dados do formulário são válidos.
+        if form.is_valid():  
+            new_entry = form.save(commit=False)  # Salva a entrada, mas não a envia ao banco de dados ainda.
+            new_entry.topic = topic  # Associa a nova entrada ao tópico específico.
+            new_entry.save()  # Agora salva a nova entrada no banco de dados.
+            
+            # Redireciona para a página do tópico após criar a nova entrada.
+            return redirect('poderoso_apps:topic', topic_id=topic_id)  
+    
+    # Se o formulário não for válido ou se não houver dados, mostra o formulário novamente.
+    context = {'topic': topic, 'form': form}  # Prepara o contexto com o tópico e o formulário.
+    
+    # Renderiza a página para criar nova entrada, enviando o contexto.
+    return render(request, 'poderoso_apps/new_entry.html', context)
+
+
+@login_required  # Protege a função para garantir que o usuário esteja logado
+def edit_entry(request, entry_id):
+    """Exibe um formulário para editar uma entrada existente."""
+    # Obtém a entrada a ser editada pelo ID fornecido.
+    entry = get_object_or_404(Entry, id=entry_id)  
+    topic = entry.topic  # Obtém o tópico ao qual a entrada pertence.
+
+    # Verifica se o tópico pertence ao usuário logado.
+    if topic.owner != request.user:
+        raise Http404  # Levanta um erro 404 se o usuário não é o proprietário do tópico.
+
+    if request.method != 'POST':  # Verifica se a requisição não é do tipo POST
+        # Se não houver dados enviados, cria um formulário preenchido com os dados da entrada existente.
+        form = EntryForm(instance=entry)  
+    else:
+        # Se a requisição for do tipo POST, significa que o usuário está enviando dados para atualizar a entrada.
+        form = EntryForm(instance=entry, data=request.POST)  # Preenche o formulário com dados existentes e os dados enviados.
+        
+        # Verifica se os dados do formulário são válidos.
+        if form.is_valid():  
+            form.save()  # Salva as alterações na entrada no banco de dados.
+            
+            # Redireciona para a página do tópico após a edição.
+            return redirect('poderoso_apps:topic', topic_id=topic.id)  
+    
+    # Prepara o contexto para renderização, incluindo a entrada, o tópico e o formulário.
+    context = {'entry': entry, 'topic': topic, 'form': form}  
+    
+    # Renderiza a página de edição, enviando o contexto.
+    return render(request, 'poderoso_apps/edit_entry.html', context)
+
+
+def planos_treino(request):
+    """Exibe a lista de planos de treino disponíveis."""
+    # Obtém todos os planos de treino do banco de dados.
+    planos = PlanoTreino.objects.all()  
+    
+    # Renderiza a lista de planos, enviando os dados para o template.
+    return render(request, 'poderoso_apps/planos_treino.html', {'planos': planos})  
+
+
+
+def detalhes_planos(request):
+    """Exibe detalhes de um plano de treino específico e permite marcar exercícios como concluídos."""
+    # Obtém o ID do plano a partir da requisição GET, que é geralmente passado na URL.
+    plano_id = request.GET.get('plano_id')
+    
+    # Inicializa as variáveis caso o plano não seja encontrado
+    plano = None
+    exercicios = None
+    progresso = 0
+    
+    if plano_id:  # Se o ID do plano foi fornecido
+        # Tenta obter o plano específico. Se não encontrar, retorna um erro 404.
+        plano = get_object_or_404(PlanoTreino, id=plano_id)
+        
+        # Obtém todos os exercícios associados ao plano.
+        exercicios = plano.exercicios.all()
+        
+        # Calcula o progresso com base nos exercícios concluídos
+        total_exercicios = exercicios.count()
+        exercicios_concluidos = exercicios.filter(concluido=True).count()
+
+        if total_exercicios > 0:
+            progresso = (exercicios_concluidos / total_exercicios) * 100
+
+    # Obtém todos os planos de treino disponíveis no banco de dados.
+    planos = PlanoTreino.objects.all()
+    
+    # Verifica se a requisição é do tipo POST, indicando que o usuário está tentando atualizar o status de um exercício.
+    if request.method == 'POST' and plano:
+        exercicio_id = request.POST.get('exercicio_id')
+        
+        # Obtém o exercício específico. Se não encontrar, retorna um erro 404.
+        exercicio = get_object_or_404(Exercicio, id=exercicio_id, plano=plano)
+        
+        # Inverte o status de 'concluído' do exercício.
+        exercicio.concluido = not exercicio.concluido
+        exercicio.save()
+        
+        # Redireciona para evitar reenvio do formulário no reload
+        return redirect(f'{request.path}?plano_id={plano_id}')
+
+    # Renderiza a página com detalhes do plano
+    return render(request, 'poderoso_apps/detalhes_plano.html', {
+        'plano': plano,
+        'exercicios': exercicios,
+        'planos': planos,
+        'progresso': progresso,
+    })
+
+# Importa o módulo path que facilita a definição de URLs.
+from django.urls import path  
+# Importa as views que contêm a lógica de cada página.
+from . import views  
+
+# Define o namespace da aplicação para que as URLs possam ser referenciadas de maneira única.
+app_name = 'poderoso_apps'  
+
+# Lista de padrões de URL que a aplicação pode responder.
+urlpatterns = [
+    # Home Page
+    path('', views.index, name='index'),  # Quando o usuário acessa a raiz do site, chama a função index na views.
+
+    # Página com Tópicos
+    path('topics/', views.topics, name='topics'),  # Quando o usuário acessa /topics/, chama a função topics.
+
+    # Página com Tópico detalhado
+    path('topics/<int:topic_id>/', views.topic, name='topic'),  # Captura um ID de tópico e chama a função topic com esse ID.
+
+    # Criação de novo tópico
+    path('new_topic/', views.new_topic, name='new_topic'),  # Acessa /new_topic/ para criar um novo tópico, chamando new_topic.
+
+    # Criação do texto do tópico
+    path('new_entry/<int:topic_id>/', views.new_entry, name='new_entry'),  # Permite criar uma nova entrada para um tópico específico.
+
+    # Edição dos tópicos inseridos
+    path('edit_entry/<int:entry_id>/', views.edit_entry, name='edit_entry'),  # Permite editar uma entrada existente, capturando seu ID.
+
+    # Exibição da lista de planos de treino
+    path('planos_treino/', views.planos_treino, name='planos_treino'),  # Acessa /planos_treino/ para exibir todos os planos de treino.
+
+    # Exibição dos detalhes de um plano de treino
+    path('detalhes_plano/', views.detalhes_planos, name='detalhes_plano'),  # Acessa /detalhes_plano/ para mostrar os detalhes de um plano específico.
+
+]
+
+# Importa os módulos necessários do Django.
+from django.db import models  
+from django.contrib.auth.models import User  # Importa o modelo User para associar usuários aos tópicos e planos.
+from django.db.models import CASCADE  # Importa o comportamento de exclusão em cascata.
+
+class Topic(models.Model):
+    """
+    Modelo que representa um tópico sobre o qual o usuário está aprendendo.
+
+    Attributes:
+        text (CharField): O título ou nome do tópico (máximo 200 caracteres)
+        date_added (DateTimeField): Data e hora de criação do tópico (preenchido automaticamente)
+        owner (ForeignKey): Referência ao usuário que criou o tópico
+    
+    Relationships:
+        - Pertence a um User (owner)
+        - Pode ter múltiplas Entry relacionadas
+    """
+    # Define o campo 'text' como um CharField com um limite de 200 caracteres.
+    text = models.CharField(max_length=200)
+    # Define o campo 'date_added' como um DateTimeField que armazena a data e a hora em que o tópico foi criado.
+    date_added = models.DateTimeField(auto_now_add=True)  # Preenchido automaticamente na criação.
+    # Define o campo 'owner' como uma chave estrangeira que referencia o modelo User.
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    def __str__(self):
+        """
+        Retorna uma representação em string do tópico.
+
+        Returns:
+            str: O texto do tópico
+        """
+        return self.text  # Retorna o texto do tópico quando chamado.
+
+class Entry(models.Model):
+    """
+    Modelo que representa uma entrada específica de aprendizado relacionada a um tópico.
+
+    Attributes:
+        topic (ForeignKey): Referência ao tópico ao qual esta entrada pertence
+        text (TextField): O conteúdo da entrada
+        date_added (DateTimeField): Data e hora de criação da entrada (preenchido automaticamente)
+    
+    Relationships:
+        - Pertence a um Topic (topic)
+
+    Meta:
+        verbose_name_plural define o nome plural correto para o modelo no admin do Django
+    """
+    # Define o campo 'topic' como uma chave estrangeira que referencia o modelo Topic.
+    topic = models.ForeignKey(Topic, on_delete=models.CASCADE)  # A entrada está vinculada a um tópico.
+    # Define o campo 'text' como um TextField para armazenar o conteúdo da entrada.
+    text = models.TextField()  
+    # Define o campo 'date_added' como um DateTimeField para armazenar a data e a hora de criação.
+    date_added = models.DateTimeField(auto_now_add=True)  # Preenchido automaticamente.
+
+    class Meta:
+        verbose_name_plural = 'entries'  # Define como 'entries' para o plural no admin.
+
+    def __str__(self):
+        """
+        Retorna uma representação em string da entrada.
+
+        Returns:
+            str: Os primeiros 50 caracteres do texto da entrada, seguidos por reticências
+        """
+        return f"({self.text[:50]}...)"  # Retorna os primeiros 50 caracteres da entrada seguidos por '...'.
+
+class PlanoTreino(models.Model):
+    """Modelo que representa um plano de treino (ex: TREINO AXB, 3X, 4X)"""
+
+    # Define o campo 'nome' como um CharField com limite de 100 caracteres.
+    nome = models.CharField(max_length=100)
+    # Define o campo 'descricao' como um TextField que pode ser nulo ou em branco.
+    descricao = models.TextField(null=True, blank=True)  
+    # Define o campo 'owner' como uma chave estrangeira que referencia o modelo User.
+    owner = models.ForeignKey(User, on_delete=CASCADE)  # Usuário que criou o plano.
+
+    def __str__(self):
+        return self.nome  # Retorna o nome do plano de treino.
+
+class Exercicio(models.Model):
+    """Modelo que representa um exercício específico em um plano"""
+
+    # Define o campo 'plano' como uma chave estrangeira que referencia o modelo PlanoTreino.
+    plano = models.ForeignKey(PlanoTreino, related_name='exercicios', on_delete=CASCADE)  
+    # Define o campo 'nome' como um CharField com limite de 200 caracteres.
+    nome = models.CharField(max_length=200)
+    # Define o campo 'series' como um IntegerField para armazenar o número de séries do exercício.
+    series = models.IntegerField()  
+    # Define o campo 'repeticoes' como um IntegerField para armazenar o número de repetições do exercício.
+    repeticoes = models.IntegerField()  
+    # Define o campo 'intervalo' como um CharField com limite de 50 caracteres para armazenar o intervalo.
+    intervalo = models.CharField(max_length=50)  
+    # Define o campo 'concluido' como um BooleanField que indica se o exercício foi concluído ou não.
+    concluido = models.BooleanField(default=False)  # Padrão é False.
+
+    def __str__(self):
+        return self.nome  # Retorna o nome do exercício.
+
+
+# Importa o módulo forms do Django, que fornece classes para criar formulários.
+from django import forms  
+# Importa os modelos Topic e Entry que serão usados nos formulários.
+from .models import Topic, Entry  
+
+class TopicForm(forms.ModelForm):
+    class Meta:
+        # Define as configurações do formulário relacionado ao modelo Topic.
+        model = Topic  # Especifica que este formulário se baseia no modelo Topic.
+        fields = ['text']  # Lista os campos do modelo que devem ser incluídos no formulário.
+        labels = {'text': ''}  # Define um rótulo vazio para o campo 'text', removendo o título do campo.
+
+class EntryForm(forms.ModelForm):
+    class Meta:
+        # Define as configurações do formulário relacionado ao modelo Entry.
+        model = Entry  # Especifica que este formulário se baseia no modelo Entry.
+        fields = ['text']  # Lista os campos do modelo que devem ser incluídos no formulário.
+        labels = {'text': ''}  # Define um rótulo vazio para o campo 'text', removendo o título do campo.
+        # Personaliza a apresentação do campo 'text' no formulário.
+        widgets = {'text': forms.Textarea(attrs={'cols': 80})}  # Usa um widget Textarea com 80 colunas.
+
+
+# Importa o módulo admin do Django, que fornece funcionalidades para criar interfaces administrativas.
+from django.contrib import admin  
+# Importa os modelos que serão registrados no painel administrativo.
+from .models import Topic, Entry, PlanoTreino, Exercicio  
+
+# Registra o modelo Topic no painel administrativo do Django.
+admin.site.register(Topic)  
+# Registra o modelo Entry no painel administrativo do Django.
+admin.site.register(Entry)  
+# Registra o modelo PlanoTreino no painel administrativo do Django.
+admin.site.register(PlanoTreino)  
+# Registra o modelo Exercicio no painel administrativo do Django.
+admin.site.register(Exercicio)  
+# Comentário indicando que aqui é o local para registrar modelos adicionais, se necessário.
+
+
+{% extends 'poderoso_apps/base.html' %}  <!-- Indica que este template estende o template base chamado base.html, permitindo que o conteúdo definido aqui seja inserido nos blocos correspondentes do template base. -->
+
+{% block page_header %}  <!-- Início do bloco que substitui o cabeçalho da página no template base. -->
+<h1>Seus Planos de Treino</h1>  <!-- Título principal da página, exibindo "Seus Planos de Treino" como cabeçalho de nível 1. -->
+{% endblock page_header %}  <!-- Fim do bloco de cabeçalho da página. -->
+
+{% block content %}  <!-- Início do bloco de conteúdo principal da página. -->
+    <form method="GET" action="{% url 'poderoso_apps:detalhes_planos' %}">  <!-- Cria um formulário que usa o método GET para enviar dados. O atributo action define a URL de destino para onde os dados do formulário serão enviados. A URL é gerada dinamicamente usando a tag {% url %}. -->
+        <label for="planos">Planos:</label>  <!-- Rótulo para o campo de seleção, associando o texto "Planos:" ao campo de seleção por meio do atributo for. -->
+        <select name="plano_id" id="planos" onchange="this.form.submit()">  <!-- Cria um campo de seleção (dropdown) para os planos de treino. O atributo onchange é acionado quando o usuário seleciona um plano, fazendo com que o formulário seja enviado automaticamente. -->
+            <option value=""> --- Selecione --- </option>  <!-- Opção padrão exibida quando nenhum plano é selecionado. -->
+            {% for plano in planos %}  <!-- Laço que itera sobre uma lista de planos disponíveis. -->
+                <option value="{{ plano.id }}" {% if plano.id == plano_id %}selected{% endif %}> {{ plano.nome }} </option>  <!-- Para cada plano na lista, cria uma opção no dropdown. O valor da opção é o ID do plano e o texto exibido é o nome do plano. Se o ID do plano atual for igual ao ID do plano selecionado (armazenado na variável plano_id), a opção é marcada como selecionada. -->
+            {% endfor %}  <!-- Fim do laço. -->
+        </select>  <!-- Fim do campo de seleção. -->
+    </form>  <!-- Fim do formulário. -->
+{% endblock content %}  <!-- Fim do bloco de conteúdo principal da página. -->
+
+{% extends 'poderoso_apps/base.html' %}  <!-- Indica que este template estende o template base chamado base.html, permitindo que o conteúdo definido aqui seja inserido nos blocos correspondentes do template base. -->
+
+{% block page_header %}  <!-- Início do bloco que substitui o cabeçalho da página no template base. -->
+    <div class="p-3 mb-4 bg-light border rounded-3">  <!-- Cria um contêiner para o cabeçalho, com classes do Bootstrap para adicionar espaçamento, fundo claro, borda e cantos arredondados. -->
+        <div class="container-fluid py-4">  <!-- Um contêiner fluido que permite que o conteúdo se expanda em toda a largura disponível, com padding vertical (superior e inferior) de 4 unidades. -->
+            <h1 class="display-3">Monitore seu progresso</h1>  <!-- Título da página, estilizado como um título de exibição grande, atraente e de destaque. -->
+            
+            <p class="lead">Make your own Learning Log, and keep a list of the
+                topics you're learning about. Whenever you learn something new
+                about a topic, make an entry summarizing what you've learned.</p>  <!-- Parágrafo explicativo que fornece uma introdução ao propósito da aplicação, utilizando a classe "lead" do Bootstrap para dar destaque ao texto. -->
+
+            <a class="btn btn-primary btn-lg mt-1" href="{% url 'accounts:register' %}">Registre-se &raquo;</a>  <!-- Cria um botão estilizado com Bootstrap que leva à página de registro. O texto do botão é "Registre-se" e inclui um símbolo de seta direita (») para indicar que o usuário será direcionado para outra página. -->
+        </div>
+    </div>
+{% endblock page_header %}  <!-- Fim do bloco de cabeçalho da página. -->
+
+{% extends 'poderoso_apps/base.html' %}  <!-- Indica que este template estende o template base chamado base.html. Isso permite que o conteúdo definido aqui seja inserido nos blocos correspondentes do template base. -->
+
+{% block page_header %}  <!-- Início do bloco que substitui o cabeçalho da página definido no template base. -->
+    <h1>{{ plano.nome }}</h1>  <!-- Exibe o nome do plano, acessando o atributo 'nome' do objeto 'plano' passado ao contexto do template. -->
+    <p>{{ plano.descricao }}</p>  <!-- Exibe a descrição do plano, acessando o atributo 'descricao' do objeto 'plano'. -->
+
+    <div style="margin-top: 10px;">
+      <p>Progresso: {{ progresso|floatformat:0 }}%</p>
+      <div style="background-color: #ddd; width: 100%; height: 20px;">
+        <div style="background-color: #4CAF50; width: {{ progresso }}%; height: 100%;"></div>
+                    <div style="background-color: #4CAF50; width: {{ progresso }}%; height: 100%;"></div>
+      </div>
+      <p>Tempo Estimado: 45:00</p>
+    </div>
+
+    <h2>Exercícios:</h2>  <!-- Título para a seção de exercícios. -->
+{% endblock page_header %}  <!-- Fim do bloco de cabeçalho. -->
+
+{% block content %}  <!-- Início do bloco que substitui o conteúdo principal do template base. -->
+<form method="GET" action="{% url 'poderoso_apps:detalhes_planos' %}">  <!-- Início de um formulário que será enviado via método GET para a URL gerada pelo nome 'detalhes_plano'. -->
+    <label for="planos">Planos:</label>  <!-- Rótulo para o campo de seleção de planos. -->
+    <select name="plano_id" id="planos" onchange="this.form.submit()">  <!-- Cria um menu suspenso (select) para escolher um plano. O formulário será enviado automaticamente quando o usuário selecionar uma opção (onchange). -->
+        <option value=""> --- Selecione --- </option>  <!-- Opção padrão que solicita ao usuário que selecione um plano. -->
+        {% for plano in planos %}  <!-- Início de um loop que itera sobre a lista de planos fornecida no contexto. -->
+            <option value="{{ plano.id }}" {% if plano.id == plano_id %}selected{% endif %}> {{ plano.nome }} </option>  <!-- Para cada plano, cria uma opção no select. Se o id do plano atual for igual ao plano_id, essa opção será marcada como selecionada. -->
+        {% endfor %}  <!-- Fim do loop. -->
+    </select>  <!-- Fim do menu suspenso. -->
+</form>
+</br>  <!-- Quebra de linha para espaçamento. -->
+<ul>  <!-- Início de uma lista não ordenada para exibir os exercícios. -->
+    {% for exercicio in exercicios %}  <!-- Início de um loop que itera sobre a lista de exercícios fornecida no contexto. -->
+      <li>  <!-- Início de um item de lista. -->
+        <p>{{ exercicio.nome }}</p>  <!-- Exibe o nome do exercício. -->
+        <p>Séries: {{ exercicio.series }} | Repetições: {{ exercicio.repeticoes }}</p>  <!-- Exibe informações sobre séries e repetições do exercício. -->
+        <p>Intervalo: {{ exercicio.intervalo }}</p>  <!-- Exibe o intervalo entre as séries do exercício. -->
+        <form method="POST">  <!-- Início de um formulário para enviar dados via método POST. Isso geralmente é usado para ações que alteram o estado do servidor. -->
+          {% csrf_token %}  <!-- Gera um token CSRF para proteger contra ataques CSRF. -->
+          <input type="hidden" name="exercicio_id" value="{{ exercicio.id }}">  <!-- Campo oculto que contém o ID do exercício, permitindo que o servidor identifique qual exercício está sendo atualizado. -->
+          <input type="checkbox" name="concluido" {% if exercicio.concluido %}checked{% endif %} onchange="this.form.submit()"> Concluído  <!-- Checkbox que indica se o exercício foi concluído. Se o exercício estiver concluído, a caixa será marcada. O formulário será enviado automaticamente quando o estado do checkbox mudar. -->
+        </form>  <!-- Fim do formulário de exercício. -->
+      </li>  <!-- Fim do item de lista. -->
+    {% endfor %}  <!-- Fim do loop de exercícios. -->
+  </ul>  <!-- Fim da lista de exercícios. -->
+
+{% endblock content %}  <!-- Fim do bloco de conteúdo. -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Define o tipo de documento como HTML5 e a linguagem do documento como inglês -->
+    <meta charset="utf-8">  <!-- Define a codificação de caracteres como UTF-8, que suporta a maioria dos caracteres. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">  <!-- Configura a viewport para responsividade, permitindo que o layout se ajuste em dispositivos móveis. -->
+    <title>Poderoso App</title>  <!-- Define o título que aparecerá na aba do navegador. -->
+
+    {% load django_bootstrap5 %}  <!-- Carrega as tags e filtros do pacote django-bootstrap5, que facilita a utilização do Bootstrap no Django. -->
+    {% bootstrap_css %}  <!-- Gera os links necessários para incluir o CSS do Bootstrap na página. -->
+    {% bootstrap_javascript %}  <!-- Gera os links para incluir os scripts JavaScript do Bootstrap. -->
+</head>
+<body>
+    <!-- Início da barra de navegação -->
+    <nav class="navbar navbar-expand-md navbar-light bg-light mb-4 border">  <!-- Cria uma barra de navegação utilizando classes do Bootstrap para estilo. -->
+        <div class="container-fluid">  <!-- Define um contêiner fluido que se ajusta ao tamanho da tela. -->
+            <a class="navbar-brand" href="{% url 'poderoso_apps:index' %}">  <!-- Cria um link para a página inicial usando a tag URL do Django. -->
+                Poderoso App</a>
+            
+            <!-- Botão para colapsar o menu em telas menores -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarCollapse" aria-controls="navbarCollapse"
+                aria-expanded="false" aria-label="Toggle navigation">  <!-- Define um botão que, ao ser clicado, expande ou colapsa o menu. -->
+                <span class="navbar-toggler-icon"></span>  <!-- Ícone que aparece no botão. -->
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarCollapse">  <!-- Início do menu colapsável. -->
+                <ul class="navbar-nav me-auto mb-2 mb-md-0">  <!-- Cria uma lista de navegação, que é automaticamente ajustada. -->
+                    <li class="nav-item">  <!-- Início de um item de navegação. -->
+                        <a class="nav-link" href="{% url 'poderoso_apps:topics' %}">  <!-- Link para a página de tópicos. -->
+                            Topics</a>
+                    </li>
+                </ul>
+
+            <div class="collapse navbar-collapse" id="navbarCollapse">
+                <ul class="navbar-nav me-auto mb-2 mb-md-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'poderoso_apps:planos_treino' %}">  <!-- Link para a página de planos de treino. -->
+                            Planos de Treino</a>
+                    </li>
+                </ul>
+
+                <!-- Links relacionados a Accounts -->
+                <ul class="navbar-nav ms-auto mb-2 mb-md-0">  <!-- Lista de navegação alinhada à direita. -->
+                    {% if user.is_authenticated %}  <!-- Verifica se o usuário está autenticado. -->
+                        <li class="nav-item">  <!-- Item de navegação para usuários autenticados. -->
+                            <span class="navbar-text me-2">Hello, {{ user.username }}</span>  <!-- Exibe uma mensagem de boas-vindas ao usuário. -->
+                        </li>
+                    {% else %}  <!-- Se o usuário não estiver autenticado, exibe opções de registro e login. -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'accounts:register' %}">  <!-- Link para a página de registro. -->
+                                Register</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'accounts:login' %}">  <!-- Link para a página de login. -->
+                                Login</a>
+                        </li>
+                    {% endif %}  <!-- Fim da verificação de autenticação. -->
+                    <li class="nav-item">  <!-- Item de navegação para logout. -->
+                        {% if user.is_authenticated %}  <!-- Verifica novamente se o usuário está autenticado. -->
+                        <form action="{% url 'accounts:logout' %}" method="post">  <!-- Cria um formulário para realizar logout. -->
+                            {% csrf_token %}  <!-- Gera um token CSRF para proteção contra ataques. -->
+                            <button name="submit" class="btn btn-outline-secondary btn-sm">  <!-- Botão para confirmar o logout. -->
+                                Logout</button>
+                        </form>
+                        {% endif %}  <!-- Fim da verificação de autenticação. -->
+                    </li>
+                </ul>
+            </div>  <!-- Fim do menu de navegação colapsável. -->
+        </div>  <!-- Fim do contêiner da barra de navegação. -->
+    </nav>
+
+    <main class="container">  <!-- Início da seção principal da página, com um contêiner que se ajusta ao tamanho da tela. -->
+        <div class="pb-2 mb-2 border-bottom">  <!-- Div com borda inferior, serve como cabeçalho da página. -->
+            {% block page_header %}{% endblock page_header %}  <!-- Bloco onde o cabeçalho da página pode ser definido em templates filhos. -->
+        </div>
+        <div>
+            {% block content %}{% endblock content %}  <!-- Bloco onde o conteúdo da página será renderizado, podendo ser sobrescrito em templates filhos. -->
+        </div>
+    </main>
+</body>
+</html>

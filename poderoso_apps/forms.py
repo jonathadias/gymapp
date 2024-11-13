@@ -18,3 +18,16 @@ class EntryForm(forms.ModelForm):
         labels = {'text': ''}  # Define um rótulo vazio para o campo 'text', removendo o título do campo.
         # Personaliza a apresentação do campo 'text' no formulário.
         widgets = {'text': forms.Textarea(attrs={'cols': 80})}  # Usa um widget Textarea com 80 colunas.
+
+class CalculoBasal(forms.Form):
+    peso = forms.FloatField(max_value=999, min_value=1, error_messages={"required": "Por favor, entre um número válido!"})
+    idade = forms.IntegerField(max_value=105)
+    altura = forms.FloatField(max_value=999, min_value=1)
+    SEXO_CHOICES = [
+        ('H', 'Homem'),
+        ('M', 'Mulher'),
+    ]
+    sexo = forms.ChoiceField(
+        choices = SEXO_CHOICES,
+        widget = forms.RadioSelect(attrs={'class': 'btn-sexo'})
+    )

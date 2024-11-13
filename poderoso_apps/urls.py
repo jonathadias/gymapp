@@ -2,6 +2,8 @@
 from django.urls import path  
 # Importa as views que contêm a lógica de cada página.
 from . import views  
+from django.conf.urls.static import static
+from django.conf import settings
 
 # Define o namespace da aplicação para que as URLs possam ser referenciadas de maneira única.
 app_name = 'poderoso_apps'  
@@ -32,4 +34,8 @@ urlpatterns = [
     # Exibição dos detalhes de um plano de treino
     path('detalhes_plano/', views.detalhes_planos, name='detalhes_plano'),  # Acessa /detalhes_plano/ para mostrar os detalhes de um plano específico.
 
-]
+    path('calculotmb/', views.calculotmb, name='calculotmb'),
+
+    path('perfil/', views.perfil, name='perfil'),
+
+]   + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

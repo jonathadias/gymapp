@@ -1,7 +1,7 @@
 # Importa funções e classes necessárias do Django
 from django.shortcuts import get_object_or_404, render, redirect  # Funções para renderizar páginas e redirecionar
 from .models import Topic, Entry, PlanoTreino, Exercicio  # Importa os modelos que representam os dados no banco de dados
-from .forms import TopicForm, EntryForm  # Importa os formulários que lidam com os dados de entrada
+from .forms import TopicForm, EntryForm, CalculoBasal  # Importa os formulários que lidam com os dados de entrada
 from django.contrib.auth.decorators import login_required  # Importa o decorador que restringe acesso a usuários logados
 from django.http import Http404  # Importa a classe para gerar erros 404
 from django.http import JsonResponse
@@ -188,3 +188,39 @@ def detalhes_planos(request):
         'progresso': progresso,
         'tempo_restante': tempo_restante
     })
+
+def calculotmb(request):
+    tmb = None
+    if request.method == 'POST':
+        form = CalculoBasal(request.POST)
+        if form.is_valid():
+            peso = form.cleaned_data['peso']
+            idade = form.cleaned_data['idade']
+            sexo = form.cleaned_data['sexo']
+            altura = form.cleaned_data['altura']
+
+        if sexo == 'H':
+            tmb = 88.36 + (13.4 * peso) + (4.8 * altura) - (5.7 * idade)
+        else:
+            tmb = 447.6 + (9.2 * peso) + (3.1 * altura) - (4.3 * idade)
+
+        return render(request, 'poderoso_apps/calculotmb.html', {
+            'peso': peso,
+            'idade': idade,
+            'altura': altura,
+            'sexo': sexo,
+            'tmb': tmb,
+            'form': form,
+
+        })
+    
+    else:
+        form = CalculoBasal()
+    
+    return render(request, 'poderoso_apps/calculotmb.html', {
+        'form': form,
+    })
+
+def perfil(request):
+
+    return render(request, 'poderoso_apps/perfil.html')
