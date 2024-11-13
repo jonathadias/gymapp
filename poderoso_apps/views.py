@@ -190,16 +190,28 @@ def detalhes_planos(request):
     })
 
 def calculotmb(request):
+    tmb = None
     if request.method == 'POST':
         form = CalculoBasal(request.POST)
         if form.is_valid():
             peso = form.cleaned_data['peso']
             idade = form.cleaned_data['idade']
             sexo = form.cleaned_data['sexo']
+            altura = form.cleaned_data['altura']
+
+        if sexo == 'H':
+            tmb = 88.36 + (13.4 * peso) + (4.8 * altura) - (5.7 * idade)
+        else:
+            tmb = 447.6 + (9.2 * peso) + (3.1 * altura) - (4.3 * idade)
 
         return render(request, 'poderoso_apps/calculotmb.html', {
             'peso': peso,
             'idade': idade,
+            'altura': altura,
+            'sexo': sexo,
+            'tmb': tmb,
+            'form': form,
+
         })
     
     else:
@@ -208,3 +220,7 @@ def calculotmb(request):
     return render(request, 'poderoso_apps/calculotmb.html', {
         'form': form,
     })
+
+def perfil(request):
+
+    return render(request, 'poderoso_apps/perfil.html')

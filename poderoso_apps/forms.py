@@ -20,8 +20,9 @@ class EntryForm(forms.ModelForm):
         widgets = {'text': forms.Textarea(attrs={'cols': 80})}  # Usa um widget Textarea com 80 colunas.
 
 class CalculoBasal(forms.Form):
-    peso = forms.FloatField(max_value=999, min_value=5, error_messages={"required": "Por favor, entre um número válido!"})
+    peso = forms.FloatField(max_value=999, min_value=1, error_messages={"required": "Por favor, entre um número válido!"})
     idade = forms.IntegerField(max_value=105)
+    altura = forms.FloatField(max_value=999, min_value=1)
     SEXO_CHOICES = [
         ('H', 'Homem'),
         ('M', 'Mulher'),

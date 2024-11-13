@@ -8,7 +8,22 @@
             {{ form.idade }}
             <h5> Peso </h5>
             {{ form.peso }}
+            <h5> Altura (em cm) </h5>
+            {{ form.altura }}
+            {{ form.sexo }}
         </div>
         <button type="submit"> Enviar</button>
     </form>
+        <br>
+
+    <div class="row">
+        <div class="col-12 col-md-6 col-lg-4 shadow p-3">
+            {% if tmb %}
+                <h4> Resultado do TMB: {{ tmb|floatformat:2 }} kcal</h4>  
+            {% endif %}
+         </div>
+    </div>
+
+
+    
 {% endblock content %}
