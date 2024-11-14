@@ -62,6 +62,7 @@
                 <ul class="navbar-nav ms-auto mb-2 mb-md-0">  <!-- Lista de navegação alinhada à direita. -->
                     {% if user.is_authenticated %}  <!-- Verifica se o usuário está autenticado. -->
                         <li class="nav-item">  <!-- Item de navegação para usuários autenticados. -->
+                            <img class="rounded-circle" style="width: 40px;" alt="Avatar" src="media/poderoso_apps/avatar.png">
                             <span class="navbar-text me-2">Hello, {{ user.username }}</span>  <!-- Exibe uma mensagem de boas-vindas ao usuário. -->
                         </li>
                     {% else %}  <!-- Se o usuário não estiver autenticado, exibe opções de registro e login. -->
@@ -74,6 +75,7 @@
                                 Login</a>
                         </li>
                     {% endif %}  <!-- Fim da verificação de autenticação. -->
+                    <br>
                     <li class="nav-item">  <!-- Item de navegação para logout. -->
                         {% if user.is_authenticated %}  <!-- Verifica novamente se o usuário está autenticado. -->
                         <form action="{% url 'accounts:logout' %}" method="post">  <!-- Cria um formulário para realizar logout. -->
