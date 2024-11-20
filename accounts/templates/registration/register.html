@@ -2,7 +2,7 @@
 
 {% block content %}
 
-    <form action="{% url 'accounts:register' %}" method="post">
+    <form action="{% url 'accounts:register' %}" method="post" enctype="multipart/form-data">
         {% csrf_token %}
         {{ form.as_div }}
         
