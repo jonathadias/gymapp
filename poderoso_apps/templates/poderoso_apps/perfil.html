@@ -4,8 +4,13 @@
 
     <div>
         <h5>Olá, {{ user.username }} </h5>
+        <img src="{{ user.profile.avatar.url }}" alt="Foto de Perfil" style="max-width: 150px; border-radius: 50%; display: block; margin: auto;">
+        <a href="{% url 'accounts:perfil_editar' %}" style="max-width:90px; border-radius: 50%; display: block; margin: auto;"> Editar Perfil </a>
+        <br>
         <h1> Treinos concluídos: var_treinos</h1>
-        <h1> Dashboard </h1>
+        <h5>Nome: {{ user.first_name }}</h5>
+        <h5>Sobrenome: {{user.last_name }}</h5>
+        <h13> Dashboard </h3>
     </div>
 
     <div class="accordion w-100" id="basicAccordion">

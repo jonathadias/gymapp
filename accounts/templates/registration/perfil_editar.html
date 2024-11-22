@@ -1,0 +1,33 @@
+{% extends "poderoso_apps/base.html" %}
+
+{% block content %}
+
+    <h2> Editar Perfil </h2>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div>
+            <h4> Informações do Perfil</h4>
+            {{ user_form.as_p }}
+        </div>
+
+        <div>
+            <h3> Mudar avatar </h3>
+            {{ profile_form.as_p }}
+        </div>
+
+        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+    </form>
+
+        {% if messages %}
+            <ul>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+    <a href="{% url 'poderoso_apps:perfil' %}" class="btn btn-secondary">Voltar</a>
+
+{% endblock content %}

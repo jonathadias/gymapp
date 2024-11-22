@@ -6,6 +6,8 @@ from django.contrib.auth.decorators import login_required  # Importa o decorador
 from django.http import Http404  # Importa a classe para gerar erros 404
 from django.http import JsonResponse
 from django.urls import reverse
+from accounts.models import Profile
+from accounts.forms import Profile
 
 
 def index(request):
@@ -224,3 +226,13 @@ def calculotmb(request):
 def perfil(request):
 
     return render(request, 'poderoso_apps/perfil.html')
+
+
+@login_required
+def profile_view(request):
+    # Obtemos o perfil associado ao usuário logado
+    profile = request.user.profile  
+    context = {
+        'profile': profile
+    }
+    return render(request, 'poderoso_apps/perfil.html', context)
