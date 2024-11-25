@@ -3,6 +3,7 @@ from django.contrib.auth import login
 from .forms import CustomUserCreationForm, ProfileEditForm, UserEditForm
 from .models import Profile
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 
 
 def register(request):
@@ -19,7 +20,7 @@ def register(request):
             #Logar  e direcionar o usuário para a homepage
             Profile.objects.create(user=new_user, avatar=form.cleaned_data['avatar'])
             login(request, new_user)
-            return redirect('poderoso_apps/perfil.html')
+            return redirect('poderoso_apps:perfil')
 
     #Mostrar formuulário em branco ou inválido
     context = {'form': form}
@@ -38,14 +39,14 @@ def perfil_editar(request):
     profile_form = ProfileEditForm(instance=request.user.profile)
 
     if request.method == 'POST':
-        user_form = UserEditForm(request.POST, request.FILES, instance=request.user.profile)
+        user_form = UserEditForm(request.POST, request.FILES, instance=request.user)
         profile_form = ProfileEditForm(request.POST, request.FILES, instance=request.user.profile)
 
         if user_form.is_valid() and profile_form.is_valid():
             user_form.save()
             profile_form.save()
-            messsages.success(request, 'Perfil atualizado')
-            return redirect('poderoso_apps/perfil.html')
+            messages.success(request, 'Perfil atualizado')
+            return redirect('poderoso_apps:perfil')
     
     context = {
         'user_form': user_form,
